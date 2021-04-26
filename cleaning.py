@@ -4,6 +4,7 @@ from functions import aspace, inp, err, succ
 
 import pandas as pd
 import numpy as np
+import math
 
 #col_list = data.columns.values.tolist()
 keywords = ['name', 'họ và tên', 'tên', 'full name', 'first name', 'last name', 'surname', 'tuổi', 'age', 'how old', 'phone', 'số điện thoại', 'sđt', 'sdt', 'dt', 'đt', 'mobile', 'di động', 'mail', 'email', 'gmail', 'địa chỉ', 'địa chỉ nhà', 'address', 'thành phố', 'quận', 'huyện', 'phường', 'tỉnh', 'thành', 'city', 'province', 'district', 'lớp', 'khối', 'class', 'grade', 'trường', 'school', 'là gì']
@@ -27,8 +28,8 @@ def info_extract(df):
     ls = np.array(df.columns)
     ls_mp = np.array(list(map(lambda x: to_score(x), ls)))
 
-    ls = ls[ls_mp < 16]
-    succ(f'We have recognized that the following columns contain personal information of the subjects\n{list(ls)}')
+    ls = list(ls[ls_mp < 16])
+    succ(f'We have recognized that the following columns contain personal information of the subjects\n{ls}')
 
     confirm = inp('Is this recognition correct?', 'Yes', 'No', default='A')
     if not confirm == 'A':
@@ -37,10 +38,30 @@ def info_extract(df):
             if col == 'Press Enter to Skip': break
             elif col in df.columns:
                 if col in ls:
-                    ls = np.setdiff1d(ls, col)
+                    ls = ls.remove(col)
                 else:
-                    ls = np.append(ls, col)
-                succ(f'Here are your columns again\n{list(ls)}')
+                    ls = ls.append(col)
+                succ(f'Here are your columns again\n{ls}')
             else:
                 err(f'We cannot find the column \'{col}\' in the imported DataFrame. Please check your spelling and try again (case-sensitive).')
-                
+
+    return ls
+
+def clean_na(df, noninfo):
+    hasnull = False
+    nullcols = []
+    for i in list(noninfo):
+        if df[i].isnull().values.any():
+            hasnull = True
+            nullcols.append(i)
+
+    if hasnull:
+        option = inp('There are missing values in your data. Do you want to assign random values to the missing data or delete the whole record that contain missing information?', 'Imputation', 'Removal', default='A')
+        if option == 'A':
+            for col in nullcols:
+                fill_list = [i for i in df[col] if not str(i) == 'nan']
+                df[col] = df[col].fillna(pd.Series(np.random.choice(fill_list, size=len(df.index))))
+        elif option == 'B':
+            df = df.dropna(subset=nullcols, axis=0)
+
+    return df

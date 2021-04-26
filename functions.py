@@ -50,6 +50,8 @@ def inp(message, *options, assign='', default=''):
             print(f'{bcol.WARNING}Session has ended. Exiting application...{bcol.ENDC}')
             sys.exit()
 
+    if len(options) > 0: result = result.upper()
+
     return result
 
 def err(message):
