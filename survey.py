@@ -50,6 +50,7 @@ def entries_count(df, noninfo):
 def exl(df, sheetname, writer):
     df.to_excel(writer, sheet_name=sheetname, index=False)
 
+    workbook  = writer.book
     worksheet = writer.sheets[sheetname]
 
     for idx, col_name in enumerate(df.columns.values):
@@ -62,8 +63,14 @@ def exl(df, sheetname, writer):
 
     max_row, max_col = df.shape
 
-    df.to_excel(writer, sheet_name='Sheet1', index=False)
+    # Add a header format.
+    header_format = workbook.add_format({
+        'bold': True,
+        'border': 0})
+
+    df.to_excel(writer, 'Sheet1', index=False)
     worksheet.autofilter(0, 0, max_row, max_col - 1)
+    worksheet.set_row(0, 31, header_format)
 
 def writeexcel(df, sheetname, writer, mode=1, startwithrow=1):
     df.to_excel(writer, sheet_name=sheetname, index=False, startrow=startwithrow)
