@@ -10,7 +10,7 @@ f.credit()
 
 ############################## PART A: Importing data ##############################
 file = f.dragdrop()
-folder, name = str(file.parent), file.name
+folder, name = str(file.parent), file.stem
 
 if file.suffix[1:] not in ['csv', 'xlsx']:
     err('Imported data must be a CSV/XLSX file.')
