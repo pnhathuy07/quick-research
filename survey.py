@@ -3,6 +3,7 @@ import xlsxwriter
 from functions import err, succ
 
 import os
+import subprocess
 
 entries = {}
 def main(df, info, noninfo, file, folder, name):
@@ -10,22 +11,20 @@ def main(df, info, noninfo, file, folder, name):
     entries = entries_count(df, noninfo)
 
     df = freq(df, noninfo)
-    df.sort_values('Frequency', inplace=True, ascending=False)
-    print(df)
 
     # Setup writer
     print('Writing Excel Sheets...')
-    filepath = folder + '/' + name + '_analysis.xlsx'
+    filepath = folder + '\\' + name + '_analysis.xlsx'
     writer = pd.ExcelWriter(filepath, engine='xlsxwriter') # pylint: disable=abstract-class-instantiated
 
-    writeexcel(df, 'Data', writer)
+    exl(df, 'Data', writer)
 
     # 7: Save and Open
     succ('Saving File...')
     writer.save()
 
     os.startfile('"' + folder + '"')
-    os.system('start "excel.exe" "' + filepath + '"')
+    os.startfile(filepath)
     succ('Launching Excel...')
 
 def freq(df, noninfo):
@@ -48,13 +47,31 @@ def entries_count(df, noninfo):
     return dict
 
 ############################## Excel Writer ##############################
+def exl(df, sheetname, writer):
+    df.to_excel(writer, sheet_name=sheetname, index=False)
+
+    worksheet = writer.sheets[sheetname]
+
+    for idx, col_name in enumerate(df.columns.values):
+        series = df[col_name]
+        max_len = max((
+                series.astype(str).map(len).max(),  # Length of largest item
+                len(str(series.name))  # Length of column name/header
+                )) + 2  # Adding extra space
+        worksheet.set_column(idx, idx, max_len)
+
+    max_row, max_col = df.shape
+
+    df.to_excel(writer, sheet_name='Sheet1', index=False)
+    worksheet.autofilter(0, 0, max_row, max_col - 1)
+
 def writeexcel(df, sheetname, writer, mode=1, startwithrow=1):
     df.to_excel(writer, sheet_name=sheetname, index=False, startrow=startwithrow)
 
     workbook  = writer.book
     worksheet = writer.sheets[sheetname]
 
-    for idx, col_name in enumerate(df.columns.values.tolist()):
+    for idx, col_name in enumerate(df.columns.values):
         series = df[col_name]
         max_len = max((
                 series.astype(str).map(len).max(),  # Length of largest item
