@@ -1,4 +1,4 @@
-from configurating import separatorStr
+from configurating import separatorStr, enter
 import functions as f
 from functions import aspace, inp, err, succ
 
@@ -7,8 +7,8 @@ import numpy as np
 import math
 
 #col_list = data.columns.values.tolist()
-keywords = ['name', 'họ và tên', 'tên', 'full name', 'first name', 'last name', 'surname', 'tuổi', 'age', 'how old', 'phone', 'số điện thoại', 'sđt', 'sdt', 'dt', 'đt', 'mobile', 'di động', 'mail', 'email', 'gmail', 'địa chỉ', 'địa chỉ nhà', 'address', 'thành phố', 'quận', 'huyện', 'phường', 'tỉnh', 'thành', 'city', 'province', 'district', 'lớp', 'khối', 'class', 'grade', 'trường', 'school', 'là gì']
-blackwords = ['nếu', 'sẽ', 'làm', 'thế nào', 'if', 'how would', 'how do', 'think', 'nghĩ', 'về việc', 'muốn', 'want', 'thích', 'like', 'prefer', 'would you', 'rather', 'chọn', 'choose', 'pick', 'nào', 'option', 'following', 'có', 'không', 'có', 'không', 'theo', 'theo bạn', 'theo em', 'theo anh', 'theo chị', 'theo anh/chị', 'theo anh chị', 'opinion', 'best', 'nhất', 'sau đây', 'sau']
+keywords = ['name', 'họ và tên', 'tên', 'full name', 'first name', 'last name', 'surname', 'tuổi', 'age', 'how old', 'phone', 'số điện thoại', 'sđt', 'sdt', 'dt', 'đt', 'mobile', 'di động', 'mail', 'email', 'gmail', 'địa chỉ', 'địa chỉ nhà', 'address', 'thành phố', 'quận', 'huyện', 'phường', 'tỉnh', 'thành', 'city', 'province', 'district', 'lớp', 'khối', 'class', 'grade', 'trường', 'school', 'là gì', 'giới tính', 'gender', 'sex']
+blackwords = ['nếu', 'sẽ', 'làm', 'thế nào', 'if', 'how would', 'how do', 'think', 'nghĩ', 'về việc', 'muốn', 'want', 'thích', 'interested', 'like', 'prefer', 'would you', 'rather', 'chọn', 'choose', 'pick', 'nào', 'option', 'following', 'có', 'không', 'có', 'không', 'theo', 'theo bạn', 'theo em', 'theo anh', 'theo chị', 'theo anh/chị', 'theo anh chị', 'opinion', 'best', 'nhất', 'sau đây', 'sau']
 
 def to_score(word):
     word = aspace(word.lower())
@@ -34,8 +34,8 @@ def info_extract(df):
     confirm = inp('Is this recognition correct?', 'Yes', 'No', default='A')
     if not confirm == 'A':
         while True:
-            col = inp('Which column do you want to add or remove?', default='Press Enter to Skip').strip()
-            if col == 'Press Enter to Skip': break
+            col = inp('Which column do you want to add or remove?', default=enter).strip()
+            if col == enter: break
             elif col in df.columns:
                 if col in ls:
                     ls = ls.remove(col)

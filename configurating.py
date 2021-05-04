@@ -15,3 +15,5 @@ separatorStr = f'{bcol.BOLD}____________________________________________________
 version = '2.3'
 productname = f'\n{bcol.BOLD}Quick Research Remastered {bcol.FAIL}[Version {version}]{bcol.ENDC}'
 creditLine = f'{productname}\nby Phan Nhat Huy'
+###
+enter = 'Press Enter to Skip'

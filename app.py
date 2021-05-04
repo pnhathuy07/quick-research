@@ -1,16 +1,26 @@
 import functions as f
 from functions import inp, err, succ
 import cleaning as c
-import survey
+import analysis
 
 import pandas as pd
 import sys
+import os
 
 f.credit()
 
+def makedir(folder):
+    try:
+        os.mkdir(folder, 0o755)
+    except OSError:
+        pass
+    os.startfile('"' + folder + '"')
+
 ############################## PART A: Importing data ##############################
 file = f.dragdrop()
-folder, name = str(file.parent), file.stem
+name = file.stem
+folder = str(file.parent).replace('/', '\\') + '\\' + name
+extension = file.suffix
 
 if file.suffix[1:] not in ['csv', 'xlsx']:
     err('Imported data must be a CSV/XLSX file.')
@@ -33,10 +43,12 @@ if mode == 'A':
 
     # C2: Clean data
     df = c.clean_na(df, noninfo)
-    df = df.drop_duplicates(subset=info, keep='last')
-    df = df.reset_index(drop=True)
+    df.reset_index(inplace=True)
 
     succ('Data cleaning completed. Here is the final DataFrame.')
     print(df)
 
-    survey.main(df, info, noninfo, file, folder, name)
+    makedir(folder)
+    df.to_csv(folder + '\\' + name + extension)
+
+    analysis.main(df, info, noninfo, file, folder, name)
