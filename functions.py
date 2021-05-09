@@ -3,6 +3,7 @@ import configurating as config
 
 import re, sys
 from pathlib import Path
+import numpy as np
 
 ############################## Credits ##############################
 def sep():
@@ -84,3 +85,14 @@ def quit():
 ############################## String ##############################
 def aspace(text):
     return text.replace(' ', '')
+
+def to_front(df, col):
+    col = [i for i in col if i in df.columns]
+    col += [i for i in df.columns if i not in col]
+    return df[col]
+
+def is_cat(df, series):
+    if series in df.dtypes[df.dtypes == np.object].index:
+        return True
+    else:
+        return False
