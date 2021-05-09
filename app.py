@@ -22,8 +22,8 @@ name = file.stem
 folder = str(file.parent).replace('/', '\\') + '\\' + name
 extension = file.suffix
 
-if file.suffix[1:] not in ['csv', 'xlsx']:
-    err('Imported data must be a CSV/XLSX file.')
+if file.suffix[1:] not in ['csv']:
+    err('Imported data must be a CSV file.')
     f.quit()
 
 skipcols = ['Timestamp']
