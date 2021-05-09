@@ -1,6 +1,6 @@
 import pandas as pd
 import xlsxwriter
-from functions import err, inp, succ, to_front, is_cat
+from functions import err, inp, succ, to_front, is_cat, maxlen
 from configurating import enter
 
 import os
@@ -29,12 +29,12 @@ def main(df, info, noninfo, file, folder, name):
             if (groups != enter):
                 df_groups = calculate_frequency(df, noninfo, groups)
                 for entry in df_groups[groups].unique():
-                    excel(df_groups[df_groups[groups] == entry], entry, writer, info=info)
+                    excel(df_groups[df_groups[groups] == entry], '(Group) ' + entry, writer, info=info, title=entry)
             break
         err(f"Column '{groups}' does not exist in the list of column names.")
 
     # Summary Statistics
-    s_excel(df, writer, noninfo)
+    s_excel(df, writer, noninfo, groups)
 
     # Save and Open
     succ('Saving File...')
@@ -83,13 +83,13 @@ def lastval_group(df, col):
 
 ############################## Excel Writer ##############################
 
-def excel(df, sheetname, writer, startrow=1, startcol=0, info='', title=''):
+def excel(df, sheetname, writer, startrow=1, startcol=0, info='', title='', groups=[]):
     df.drop('index', axis=1, errors='ignore', inplace=True)
+    if title == '': title = sheetname
 
     sheetname = re.sub(r'(\[|\]|\:|\*|\?|\/|\\)', '', sheetname)
-    if len(sheetname) > 28:
-        sheetname = sheetname[:28] + '...'
-
+    sheetname = maxlen(sheetname)
+    
     df.to_excel(writer, sheet_name=sheetname, index=False, startrow=startrow, startcol=startcol)
 
     workbook  = writer.book
@@ -110,7 +110,7 @@ def excel(df, sheetname, writer, startrow=1, startcol=0, info='', title=''):
             worksheet.conditional_format(startrow + 1, startcol + loc, startrow + max_row + 1, startcol + loc, {'type': 'no_errors', 'format': info_format})
 
     # Percentage format.
-    percentage_format = workbook.add_format({'num_format': '0.0%'})
+    percentage_format = workbook.add_format({'num_format': '0%'})
     if 'Percentage' in df.columns:
         loc = df.columns.get_loc('Percentage')
         worksheet.conditional_format(startrow + 1, startcol + loc, startrow + max_row + 1, startcol + loc, {'type': 'no_errors', 'format': percentage_format})
@@ -126,9 +126,9 @@ def excel(df, sheetname, writer, startrow=1, startcol=0, info='', title=''):
         worksheet.set_column(startcol + idx, startcol + idx, max_len)
 
     # Title
-    if title == '': title = sheetname
-    title_format = workbook.add_format({'bold': True, 'font_size': 52})
-    worksheet.merge_range(xlsxwriter.utility.xl_range(startrow - 1, startcol, startrow - 1, startcol + max_col - 1), title, title_format)
+    title_format = workbook.add_format({'bold': True, 'font_size': 42, 'fg_color': '#ffffff'})
+    worksheet.conditional_format(startrow - 1, startcol, startrow - 1, startcol + max_col - 2, {'type': 'no_errors', 'format': title_format})
+    worksheet.write(startrow - 1, startcol, title, title_format)
 
     # Thick borders
     b_border = workbook.add_format(
@@ -139,6 +139,7 @@ def excel(df, sheetname, writer, startrow=1, startcol=0, info='', title=''):
     )
     header_format = workbook.add_format(
         {
+            'top': 2,
             'bottom': 2,
             'color': '#000000'
         }
@@ -154,24 +155,38 @@ def excel(df, sheetname, writer, startrow=1, startcol=0, info='', title=''):
         worksheet.conditional_format(xlsxwriter.utility.xl_range(startrow + i + 1, startcol, startrow + i + 1, startcol + max_col - 1), {'type': 'no_errors','format': b_border})
 
     worksheet.conditional_format(xlsxwriter.utility.xl_range(startrow, startcol, startrow, startcol + max_col - 1), {'type': 'no_errors','format': header_format})
-    worksheet.conditional_format(xlsxwriter.utility.xl_range(startrow - 1, startcol + max_col, max_row + 1, startcol + max_col), {'type': 'no_errors','format': l_thick_border})
+    worksheet.conditional_format(xlsxwriter.utility.xl_range(startrow, startcol + max_col, startrow + max_row, startcol + max_col), {'type': 'no_errors','format': l_thick_border})
 
     if '__Freq' in df.columns:
         loc = df.columns.get_loc('__Freq')
         worksheet.conditional_format(startrow + 1, startcol + loc, startrow + max_row + 1, startcol + loc, {'type': '3_color_scale'})
+    for i in groups:
+        loc = df.columns.get_loc(i)
+        worksheet.conditional_format(startrow + 1, startcol + loc, startrow + max_row + 1, startcol + loc, {'type': 'data_bar'})
 
     # Change selection
     worksheet.set_selection(startrow + max_row, startcol + max_col + 2, startrow + max_row, startcol + max_col + 2)
 
-def s_excel(df, writer, noninfo):
-    startcol = 0
-    
+def catstat(df, series, groupby='Tất cả'):
+    data = pd.DataFrame(df[series].value_counts().reset_index())
+    data['Values'] = data['index']
+    data[groupby] = data[series]
+    data.drop([series], axis=1, errors='ignore', inplace=True)
+    data = data.set_index('index')
+    return data
+
+def s_excel(df, writer, noninfo, groups=enter):
     for series in noninfo:
         if is_cat(df, series):
-            data = pd.DataFrame(df[series].value_counts().reset_index())
-            data['Values'] = data['index']
-            data['Count'] = data[series]
-            data.drop(series, axis=1, inplace=True)
-            data['Percentage'] = data['Count'] / data['Count'].sum()
-            excel(data, series, writer, startcol=startcol)
-            startcol += 2
+            data = catstat(df, series)
+
+            groups_list = ['Tất cả']
+            if groups != enter:
+                for g in df[groups].unique():
+                    data[g] = 0
+                    data_grouped = catstat(df[df[groups] == g], series, g)
+                    data.update(data_grouped)
+                
+                groups_list += list(df[groups].unique())
+
+            excel(data, '(Thống kê) ' + series, writer, title=series, groups=groups_list)

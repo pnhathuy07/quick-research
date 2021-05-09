@@ -78,6 +78,11 @@ def dragdrop():
 
     return file
 
+def maxlen(str, nlen=31):
+    if len(str) > nlen - 3:
+        str = str[:nlen - 3] + '...'
+    return str
+
 ############################## System Controls ##############################
 def quit():
     sys.exit(0)
