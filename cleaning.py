@@ -38,9 +38,9 @@ def info_extract(df):
             if col == enter: break
             elif col in df.columns:
                 if col in ls:
-                    ls = ls.remove(col)
+                    ls.remove(col)
                 else:
-                    ls = ls.append(col)
+                   ls.append(col)
                 succ(f'Here are your columns again\n{ls}')
             else:
                 err(f'We cannot find the column \'{col}\' in the imported DataFrame. Please check your spelling and try again (case-sensitive).')

@@ -1,6 +1,7 @@
 import functions as f
 from functions import inp, err, succ
 import cleaning as c
+import visualization as v
 import analysis
 
 import pandas as pd
@@ -51,4 +52,9 @@ if mode == 'A':
     makedir(folder)
     df.to_csv(folder + '\\' + name + extension)
 
+    makedir(folder + '\\plots')
+    v.main(folder)
+
     analysis.main(df, info, noninfo, file, folder, name)
+elif mode == 'B':
+    succ('Data Visualization coming soon!')

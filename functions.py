@@ -78,6 +78,10 @@ def dragdrop():
 
     return file
 
+############################## Validation ##############################
+def validate(str):
+    return re.sub(r'(\[|\]|\:|\*|\?|\/|\\)', '', str)
+
 def maxlen(str, nlen=31):
     if len(str) > nlen - 3:
         str = str[:nlen - 3] + '...'
@@ -94,10 +98,4 @@ def aspace(text):
 def to_front(df, col):
     col = [i for i in col if i in df.columns]
     col += [i for i in df.columns if i not in col]
-    return df[col]
-
-def is_cat(df, series):
-    if series in df.dtypes[df.dtypes == np.object].index:
-        return True
-    else:
-        return False
+    return df.loc[:, col]
