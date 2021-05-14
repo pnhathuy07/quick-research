@@ -206,7 +206,7 @@ def s_excel(df, writer, noninfo, groups=enter):
     for series in df.columns:
         if series not in ['index', '__Freq', '__Class']:
             if is_cat(df[series]):
-                if series in noninfo:
+                if (series in noninfo) or (series in groups):
                     data = catstat(df, series)
 
                     groups_list = ['Tất cả']

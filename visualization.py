@@ -26,7 +26,7 @@ def savefig(type, x, groups=''):
 def kde(df, x, groups=''):
     if groups != enter:
         if groups == '':
-            sns.histplot(df.loc[:, x], color='#217346', kde=True, binwidth=5, legend=None)
+            sns.histplot(df.loc[:, x], color='#217346', kde=True, bins=10, legend=None)
         else:
             for g in df[groups].unique():
                 sns.kdeplot(df.loc[df[groups] == g, x], shade=True, linewidth=1, alpha=.45, bw_adjust=.8, thresh=0)
