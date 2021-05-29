@@ -5,6 +5,7 @@ from functions import validate, max_len
 from configurating import skip_string
 
 folder = None
+title_font_size = 12
 
 
 def main(f):
@@ -32,11 +33,11 @@ def kde(df, x, groups=None):
             sns.histplot(df.loc[:, x], color="#217346", kde=True, bins=10, legend=None)
         else:
             for g in df[groups].unique():
-                sns.kdeplot(df.loc[df[groups] == g, x], shade=True, linewidth=1, alpha=.45, bw_adjust=.8, thresh=0)
+                sns.kdeplot(df.loc[df[groups] == g, x], shade=True, linewidth=1, alpha=.6, bw_adjust=.8, thresh=0)
 
             plt.legend(labels=df[groups].unique(), edgecolor="#000000", fancybox=False)
-        
-        plt.title(x)
+
+        plt.title(x, fontdict={"fontsize": title_font_size})
 
         return save_figure("kde", x, groups)
 
@@ -48,9 +49,9 @@ def bar(df, name):
     else:
         df.plot(kind="barh", legend=None)
 
-    plt.title(name)
+    plt.title(name, fontdict={"fontsize": title_font_size})
 
-    plt.ylabel(name)
+    plt.ylabel(None)
     plt.xlabel("Count")
 
     plt.tight_layout()
@@ -68,7 +69,7 @@ def pie(df, x, y, name):
     labels = df.loc[df[y] != 0, x]
 
     plt.legend(patches, labels, edgecolor="#000000", fancybox=False, loc="center left", borderaxespad=0)
-    plt.subplots_adjust(right=1.5)
+    plt.subplots_adjust(right=2.5)
 
     plt.setp(auto_pcts, **{"color": "white", "weight": "bold", "fontsize": 12, "fontname": "DejaVu Sans"})
 
@@ -77,8 +78,8 @@ def pie(df, x, y, name):
     fig = plt.gcf()
     fig.gca().add_artist(centre_circle)
 
-    plt.axis("equal") 
-    plt.title(name)
+    plt.axis("equal")
+    plt.title(name, fontdict={"fontsize": title_font_size})
 
-    plt.tight_layout(rect=[0.0, 0.0, 1.3, 1.0])
+    plt.tight_layout(rect=[0.0, 0.0, 1.2, 1.0])
     return save_figure("pie", name)

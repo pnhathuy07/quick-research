@@ -13,7 +13,7 @@ class ConsoleColors:
 separator_string = f"{ConsoleColors.bold}-------------------------------------------" \
                    f"-----------------------------------------------{ConsoleColors.end}"
 
-version = "2.4"
+version = "2.5"
 product_name = f"\n{ConsoleColors.bold}Quick Research Remastered {ConsoleColors.red}[Version {version}]" \
                f"{ConsoleColors.end}"
 creditLine = f"{product_name}\nby Phan Nhat Huy"

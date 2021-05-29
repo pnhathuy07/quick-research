@@ -1,9 +1,15 @@
 import pandas as pd
+import numpy as np
 from pandas.api.types import is_string_dtype as is_categorical, is_numeric_dtype as is_numerical
+import xlsxwriter
 from xlsxwriter.utility import xl_range
 from functions import err, inp, success, to_front, max_len, validate
 import visualization
 from configurating import skip_string
+
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.pipeline import make_pipeline
 
 import os
 
@@ -29,7 +35,8 @@ def main(df, info, noninfo, folder, name):
 
     # ---------------------------------------- PART B: Survey Analysis ---------------------------------------- #
     # A1: Calculate frequency
-    df_all = calculate_frequency(df, noninfo)
+    df_all = cluster_by_features(df, noninfo)
+    df_all = calculate_frequency(df_all, noninfo)
 
     # A2: Write analysis worksheets
     to_excel(df_all, "Tất cả", writer_a, info=info)
@@ -44,17 +51,27 @@ def main(df, info, noninfo, folder, name):
                 df_groups = calculate_frequency(df, noninfo, groups)
                 for entry in df_groups[groups].unique():
                     to_excel(df_groups[df_groups[groups] == entry], "(Group) " + entry, writer_a, info=info,
-                             title="Group: " + entry, title_size=38)
+                             title="Group: " + entry, title_size=42)
             break
         err(f"Column '{groups}' does not exist in the list of column names.")
 
     # ---------------------------------------- PART C: Summary Statistics ---------------------------------------- #
+    success("Creating Summary Statistics.")
     summary_statistics(df, writer_b, noninfo, groups)
 
     # ---------------------------------------- PART D: Save and open ---------------------------------------- #
     # D1: Save writers
-    writer_a.save()
-    writer_b.save()
+    success("Saving files...")
+
+    has_error = True
+    while has_error:
+        try:
+            writer_a.save()
+            writer_b.save()
+            has_error = False
+        except xlsxwriter.exceptions.FileCreateError:
+            err("Please save your work and close Excel to save new files.")
+            input("Press Enter to Continue.\n")
 
     success("Excel files successfully saved to this folder.")
     print(folder)
@@ -63,14 +80,14 @@ def main(df, info, noninfo, folder, name):
     os.system(f'start "excel.exe" "{filepath_a}"')
     success("Launching Excel...")
 
-    # D3: Avoid leaving the console while launching Excel
+    # D3: Avoid exiting the console while launching Excel
     while input() == "":
         pass
 
 
 # ---------------------------------------- Excel Writer ---------------------------------------- #
 def to_excel(df, sheet_name: str, excel_writer, start_row=1, start_col=0, info=None, title=None,
-             title_size=58, groups=None, image=None):
+             title_size=62, groups=None, image=None):
     if groups is None:
         groups = list()
 
@@ -169,7 +186,7 @@ def to_excel(df, sheet_name: str, excel_writer, start_row=1, start_col=0, info=N
     for i in groups:
         loc = df.columns.get_loc(i)
         worksheet.conditional_format(start_row + 1, start_col + loc, start_row + max_row + 1, start_col + loc,
-                                     {"type": "data_bar"})
+                                     {"type": "data_bar", "bar_color": "#ffb628"})
 
     # Move selection out of sight
     selection = 10 ** 4
@@ -177,6 +194,21 @@ def to_excel(df, sheet_name: str, excel_writer, start_row=1, start_col=0, info=N
 
 
 # ---------------------------------------- Survey Analysis ---------------------------------------- #
+def cluster_by_features(df, noninfo):
+    n_clusters = len(df.index) // 6 + 1
+
+    X = pd.get_dummies(df.loc[:, noninfo], drop_first=True)
+
+    pipe = make_pipeline(StandardScaler(), KMeans(n_clusters=n_clusters))
+    labels = pipe.fit_predict(X)
+
+    df2 = pd.DataFrame(df)
+    df2.loc[:, "__Cluster"] = np.core.defchararray.add("Group ", (np.array(labels) + 1).astype(str))
+    df2 = to_front(df2, ["__Cluster"])
+
+    return df2
+
+
 def calculate_frequency(df, noninfo, groups=skip_string):
     df2 = pd.DataFrame()
 
@@ -234,7 +266,7 @@ def numerical_stats(df, series, group_by="Tất cả", old_data=None):
 
 def summary_statistics(df, writer_engine, noninfo, groups=skip_string):
     for series in df.columns:
-        if series not in ["index", "__Freq", "__Class"]:
+        if series not in ["index", "__Freq", "__Class", "__Cluster"]:
             if is_categorical(df[series]):
                 if (series in noninfo) or (series in groups):
                     data = categorical_stats(df, series)
