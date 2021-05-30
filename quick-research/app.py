@@ -20,10 +20,10 @@ def makedir(folder_name: str, open_folder: bool = False):
 
 
 def main():
-    # -------------------------------- PART A: Write credit line -------------------------------- #
+    # -------------------------------- PART A: Credit Line -------------------------------- #
     functions.credit()
 
-    # -------------------------------- PART B: Importing data -------------------------------- #
+    # -------------------------------- PART B: Importing Data -------------------------------- #
     file = functions.drag_drop()
     name = file.stem
     folder = str(file.parent).replace("/", "\\") + "\\" + name
@@ -42,7 +42,7 @@ def main():
     success("Data has been successfully imported into this DataFrame.")
     print(df)
 
-    # -------------------------------- PART C: Finding Trends in a Survey -------------------------------- #
+    # -------------------------------- PART C: Survey Analysis -------------------------------- #
     # C1: Extract personal information
     info = cleaning.info_extract(df)
     noninfo = [i for i in df.columns if i not in info]
@@ -54,12 +54,14 @@ def main():
     success("Data cleaning completed. Here is the final DataFrame.")
     print(df)
 
+    # C3: Create directories
     makedir(folder, True)
     df.to_csv(folder + "\\" + name + extension, index=False)
 
     makedir(folder + "\\plots")
     visualization.main(folder)
 
+    # C4: Survey Analysis
     analysis.main(df, info, noninfo, folder, name)
 
 

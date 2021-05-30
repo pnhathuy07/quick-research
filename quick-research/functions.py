@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 import configurations as config
-from configurations import separator_string, ConsoleColors
+from configurations import separator_string, skip_string, ConsoleColors
 
 
 # ---------------------------------------- Credits ---------------------------------------- #
@@ -66,6 +66,39 @@ def inp(message, *options, assign='', default=''):
         result = result.upper()
 
     return result
+
+
+def inp_select(message, selection_list, current_list=None, n_max=0, n_min=0):
+    if current_list is None:
+        current_list = list()
+
+    while True:
+        while len(current_list) > n_max > 0:
+            current_list.pop(0)
+
+        col = inp("{}\n{}You can either specify by name, or by index.\n\n{}"
+                  .format(message, ConsoleColors.end, "\n".join([str(x) if x[1] not in current_list
+                                                                 else ConsoleColors.green + str(x) + ConsoleColors.end
+                                                                 for x in list(enumerate(selection_list))])),
+                  default=skip_string).strip()
+
+        if col in (str(x) for x in range(len(selection_list))):
+            col = selection_list[int(col)]
+
+        if col == skip_string:
+            if len(current_list) < n_min:
+                err("You must select at least {} options.".format(n_min))
+            else:
+                break
+        elif col in selection_list:
+            if col in current_list:
+                current_list.remove(col)
+            else:
+                current_list.append(col)
+        else:
+            err(f"Selection '{col}' does not exist in the list of names and indices.")
+
+    return current_list
 
 
 def err(message):

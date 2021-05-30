@@ -1,5 +1,4 @@
-from configurations import skip_string, ConsoleColors
-from functions import remove_spaces, inp, err, success
+from functions import remove_spaces, inp, success, inp_select
 
 import pandas as pd
 import numpy as np
@@ -35,27 +34,9 @@ def info_extract(df):
 
     confirm = inp("Is this recognition correct?", "Yes", "No", default="A")
     if not confirm == "A":
-        while True:
-            col = inp("Which column do you want to add or remove?\n\n"
-                      "{}You can either specify columns by name, or by the following indices.\n\n{}"
-                      .format(ConsoleColors.end, "\n".join([str(x) if x[1] not in ls
-                                                            else ConsoleColors.green + str(x) + ConsoleColors.end
-                                                            for x in list(enumerate(df.columns))])),
-                      default=skip_string).strip()
-
-            if col in (str(x) for x in range(len(df.columns))):
-                col = df.columns[int(col)]
-
-            if col == skip_string:
-                break
-            elif col in df.columns:
-                if col in ls:
-                    ls.remove(col)
-                else:
-                    ls.append(col)
-                success(f"Here are your columns again\n{ls}")
-            else:
-                err(f"Column '{col}' does not exist in the list of column names.\n{df.columns.tolist()}")
+        ls = inp_select("Which column do you want to add or remove?", df.columns.tolist(), current_list=ls,
+                        n_max=len(df.columns) - 1)
+        success(f"Here are your info columns again\n{ls}")
 
     return ls
 

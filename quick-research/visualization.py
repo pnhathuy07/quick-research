@@ -17,19 +17,19 @@ def main(f):
     folder = f + "\\plots"
 
 
-def save_figure(plot_type, x, groups=None):
-    if groups is None:
+def save_figure(plot_type, x, groups="__All"):
+    if groups == "__All":
         groups = "Tất cả"
-    path = "{}\\{}_{}_{}.jpg".format(folder, plot_type, max_len(validate(x), 20), max_len(validate(groups), 20))
+    path = "{}\\{} - {} ({}).jpg".format(folder, plot_type, max_len(validate(x), 80), max_len(validate(groups), 50))
     plt.savefig(path, dpi=200)
     plt.clf()
     return path
 
 
 # ---------------------------------------- Plotting data ---------------------------------------- #
-def kde(df, x, groups=None):
-    if groups != skip_string:
-        if groups is None:
+def kde(df, x, groups="__All"):
+    if groups is not None:
+        if groups == "__All":
             sns.histplot(df.loc[:, x], color="#217346", kde=True, bins=10, legend=None)
         else:
             for g in df[groups].unique():
@@ -39,7 +39,7 @@ def kde(df, x, groups=None):
 
         plt.title(x, fontdict={"fontsize": title_font_size})
 
-        return save_figure("kde", x, groups)
+        return save_figure("KDE", x, groups)
 
 
 def bar(df, name):
@@ -55,7 +55,7 @@ def bar(df, name):
     plt.xlabel("Count")
 
     plt.tight_layout()
-    return save_figure("bar", name)
+    return save_figure("BAR", name)
 
 
 def pie(df, x, y, name):
@@ -82,4 +82,4 @@ def pie(df, x, y, name):
     plt.title(name, fontdict={"fontsize": title_font_size})
 
     plt.tight_layout(rect=[0.0, 0.0, 1.2, 1.0])
-    return save_figure("pie", name)
+    return save_figure("PIE", name)

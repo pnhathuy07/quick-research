@@ -3,9 +3,8 @@ import numpy as np
 from pandas.api.types import is_string_dtype as is_categorical, is_numeric_dtype as is_numerical
 import xlsxwriter
 from xlsxwriter.utility import xl_range
-from functions import err, inp, success, to_front, max_len, validate
+from functions import err, inp_select, success, to_front, max_len, validate
 import visualization
-from configurations import skip_string
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
@@ -44,16 +43,15 @@ def main(df, info, noninfo, folder, name):
     to_excel(df_all[df_all["__Class"].isin(["D", "E", "F"])], "Số ít", writer_a, info=info)
 
     # A3: Write grouped analysis worksheets
-    while True:
-        groups = inp("Which column specifies the groups of the subjects?", default=skip_string)
-        if (groups == skip_string) or (groups in df.columns):
-            if groups != skip_string:
-                df_groups = calculate_frequency(df, noninfo, groups)
-                for entry in df_groups[groups].unique():
-                    to_excel(df_groups[df_groups[groups] == entry], "(Group) " + entry, writer_a, info=info,
-                             title="Group: " + entry, title_size=42)
-            break
-        err(f"Column '{groups}' does not exist in the list of column names.\n{df.columns.tolist()}")
+    groups = inp_select("Which column specifies the groups of the subjects?", df.columns.tolist(), n_max=1)
+    if len(groups) > 0:
+        groups = groups[0]
+        df_groups = calculate_frequency(df, noninfo, groups)
+        for entry in df_groups[groups].unique():
+            to_excel(df_groups[df_groups[groups] == entry], "(Group) " + entry, writer_a, info=info,
+                     title="Group: " + entry, title_size=42)
+    else:
+        groups = None
 
     # ---------------------------------------- PART C: Summary Statistics ---------------------------------------- #
     success("Creating Summary Statistics.")
@@ -209,11 +207,11 @@ def cluster_by_features(df, noninfo):
     return df2
 
 
-def calculate_frequency(df, noninfo, groups=skip_string):
+def calculate_frequency(df, noninfo, groups=None):
     df2 = pd.DataFrame()
 
     for col in noninfo:
-        if groups != skip_string:
+        if groups is not None:
             df2.loc[:, col] = df.groupby([groups, col])[col].transform("count")
         else:
             df2.loc[:, col] = df.groupby(col)[col].transform("count")
@@ -221,7 +219,7 @@ def calculate_frequency(df, noninfo, groups=skip_string):
     df.loc[:, "__Freq"] = df2.sum(axis=1)
     df.sort_values("__Freq", ascending=False, inplace=True)
 
-    if groups != skip_string:
+    if groups is not None:
         for g in df[groups].unique():
             df.loc[df[groups] == g, :] = cluster_by_frequency(df[df[groups] == g])
     else:
@@ -264,15 +262,15 @@ def numerical_stats(df, series, group_by="Tất cả", old_data=None):
     return data
 
 
-def summary_statistics(df, writer_engine, noninfo, groups=skip_string):
+def summary_statistics(df, writer_engine, noninfo, groups):
     for series in df.columns:
         if series not in ["index", "__Freq", "__Class", "__Cluster"]:
             if is_categorical(df[series]):
-                if (series in noninfo) or (series in groups):
+                if (series in noninfo) or (series == groups):
                     data = categorical_stats(df, series)
 
                     groups_list = ["Tất cả"]
-                    if groups != skip_string:
+                    if groups is not None:
                         for g in df[groups].unique():
                             data.loc[:, g] = 0
                             data_grouped = categorical_stats(df[df[groups] == g], series, g)
@@ -292,7 +290,7 @@ def summary_statistics(df, writer_engine, noninfo, groups=skip_string):
                 if (df.loc[:, series].mean() < threshold) or (series in noninfo):
                     data = numerical_stats(df, series)
 
-                    if groups != skip_string:
+                    if groups is not None:
                         for g in df[groups].unique():
                             data = numerical_stats(df[df[groups] == g], series, g, data)
 
