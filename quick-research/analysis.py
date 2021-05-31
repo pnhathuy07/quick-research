@@ -5,6 +5,7 @@ import xlsxwriter
 from xlsxwriter.utility import xl_range
 from functions import err, inp_select, success, to_front, max_len, validate
 import visualization
+import branding
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
@@ -13,6 +14,7 @@ from sklearn.pipeline import make_pipeline
 import os
 
 directory = os.path.dirname(__file__)
+logo_directory = [directory + "/source/images/transparent/colorful/black_text/logo_horizontal.png"]
 
 
 def setup_writer(workbook_name, folder, filename) -> tuple:
@@ -29,20 +31,25 @@ def main(df, info, noninfo, folder, name):
     pd.options.mode.chained_assignment = None
 
     # ---------------------------------------- PART A: Setup writers ---------------------------------------- #
+    # A1: Setup writers
     writer_a, filepath_a = setup_writer("analysis", folder, name)
     writer_b, filepath_b = setup_writer("statistics", folder, name)
 
+    # A2: Branding
+    branding.page(writer_a)
+    branding.page(writer_b)
+
     # ---------------------------------------- PART B: Survey Analysis ---------------------------------------- #
-    # A1: Calculate frequency
+    # B1: Calculate frequency
     df_all = cluster_by_features(df, noninfo)
     df_all = calculate_frequency(df_all, noninfo)
 
-    # A2: Write analysis worksheets
-    to_excel(df_all, "Tất cả", writer_a, info=info)
-    to_excel(df_all[df_all["__Class"].isin(["A", "B", "C"])], "Số đông", writer_a, info=info)
-    to_excel(df_all[df_all["__Class"].isin(["D", "E", "F"])], "Số ít", writer_a, info=info)
+    # B2: Write analysis worksheets
+    to_excel(df_all, "Tất cả", writer_a, info=info, image=logo_directory)
+    to_excel(df_all[df_all["__Class"].isin(["A", "B", "C"])], "Số đông", writer_a, info=info, image=logo_directory)
+    to_excel(df_all[df_all["__Class"].isin(["D", "E", "F"])], "Số ít", writer_a, info=info, image=logo_directory)
 
-    # A3: Write grouped analysis worksheets
+    # B3: Write grouped analysis worksheets
     groups = inp_select("Which column specifies the groups of the subjects?", df.columns.tolist(), n_max=1)
     if len(groups) > 0:
         groups = groups[0]
@@ -187,8 +194,8 @@ def to_excel(df, sheet_name: str, excel_writer, start_row=1, start_col=0, info=N
                                      {"type": "data_bar", "bar_color": "#ffb628"})
 
     # Move selection out of sight
-    selection = 10 ** 4
-    worksheet.set_selection(selection, selection, selection, selection)
+    selection_a, selection_b = 270206, 11187
+    worksheet.set_selection(selection_a, selection_b, selection_a, selection_b)
 
 
 # ---------------------------------------- Survey Analysis ---------------------------------------- #

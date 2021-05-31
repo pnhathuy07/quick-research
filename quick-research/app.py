@@ -3,7 +3,6 @@ from functions import err, success
 import cleaning
 import visualization
 import analysis
-
 import pandas as pd
 import os
 
@@ -40,7 +39,7 @@ def main():
         functions.quit_app()
 
     success("Data has been successfully imported into this DataFrame.")
-    print(df)
+    print(df, df.info(), sep="\n\n")
 
     # -------------------------------- PART C: Survey Analysis -------------------------------- #
     # C1: Extract personal information
@@ -52,7 +51,7 @@ def main():
     df.reset_index(drop=True, inplace=True)
 
     success("Data cleaning completed. Here is the final DataFrame.")
-    print(df)
+    print(df, df.info(), sep="\n\n")
 
     # C3: Create directories
     makedir(folder, True)

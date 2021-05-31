@@ -1,8 +1,6 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
-
 from functions import validate, max_len
-from configurations import skip_string
 
 folder = None
 title_font_size = 12

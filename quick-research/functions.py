@@ -1,7 +1,6 @@
 import re
 import sys
 from pathlib import Path
-
 import configurations as config
 from configurations import separator_string, skip_string, ConsoleColors
 

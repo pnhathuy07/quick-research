@@ -1,5 +1,4 @@
 from functions import remove_spaces, inp, success, inp_select
-
 import pandas as pd
 import numpy as np
 
@@ -51,14 +50,14 @@ def clean_na(df, noninfo):
 
     if has_null:
         option = inp(
-            "There are missing values in your data. Do you want to assign random values to the missing data or delete "
-            "the whole record that contain missing information?",
-            "Imputation", "Removal", default="A")
-        if option == "A":
+            "There are missing values in your data. Do you want to leave missing values blank, assign random values "
+            "to the missing data or delete the whole record that contain missing information?",
+            "Leave Blank", "Impute", "Remove", default="A")
+        if option == "B":
             for col in null_columns:
                 fill_list = [i for i in df[col] if not str(i) == "nan"]
                 df[col] = df[col].fillna(pd.Series(np.random.choice(fill_list, size=len(df.index))))
-        elif option == "B":
+        elif option == "C":
             df = df.dropna(subset=null_columns, axis=0)
 
     return df
