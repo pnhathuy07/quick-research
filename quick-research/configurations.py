@@ -11,11 +11,11 @@ class ConsoleColors:
 
 
 separator_string = f"{ConsoleColors.bold}-------------------------------------------" \
-                   f"-----------------------------------------------{ConsoleColors.end}"
+                   f"--------------------------------------------{ConsoleColors.end}"
 
 version = "3.0"
-product_name = f"\n{ConsoleColors.bold}Quick Research {ConsoleColors.red}[Version {version}]" \
+product_name = f"\n{ConsoleColors.bold}Quick Research (Version {version})" \
                f"{ConsoleColors.end}"
-creditLine = f"{product_name}\nby Phan Nhat Huy"
+creditLine = f"{product_name}\nPhan Nhat Huy"
 
 skip_string = "Press Enter to Skip"

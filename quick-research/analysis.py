@@ -32,7 +32,7 @@ def main(df, info, noninfo, folder, name):
 
     # ---------------------------------------- PART A: Setup writers ---------------------------------------- #
     # A1: Setup writers
-    writer_a, filepath_a = setup_writer("analysis", folder, name)
+    writer_a, filepath_a = setup_writer("data", folder, name)
     writer_b, filepath_b = setup_writer("statistics", folder, name)
 
     # A2: Branding
@@ -45,9 +45,9 @@ def main(df, info, noninfo, folder, name):
     df_all = calculate_frequency(df_all, noninfo)
 
     # B2: Write analysis worksheets
-    to_excel(df_all, "Tất cả", writer_a, info=info, image=logo_directory)
-    to_excel(df_all[df_all["__Class"].isin(["A", "B", "C"])], "Số đông", writer_a, info=info, image=logo_directory)
-    to_excel(df_all[df_all["__Class"].isin(["D", "E", "F"])], "Số ít", writer_a, info=info, image=logo_directory)
+    to_excel(df_all, "Tất cả", writer_a, info=info, has_logo=True)
+    to_excel(df_all[df_all["__Class"].isin(["A", "B", "C"])], "Số đông", writer_a, info=info, has_logo=True)
+    to_excel(df_all[df_all["__Class"].isin(["D", "E", "F"])], "Số ít", writer_a, info=info, has_logo=True)
 
     # B3: Write grouped analysis worksheets
     groups = inp_select("Which column specifies the groups of the subjects?", df.columns.tolist(), n_max=1)
@@ -75,14 +75,14 @@ def main(df, info, noninfo, folder, name):
             writer_b.save()
             has_error = False
         except xlsxwriter.exceptions.FileCreateError:
-            err("Please save your work and close Excel to save new files.")
+            err("Please save your work and close Excel before new files can be saved.")
             input("Press Enter to Continue.\n")
 
-    success("Excel files successfully saved to this folder.")
+    success("Successfully saved to this folder.")
     print(folder)
 
     # D2: Launch Excel
-    os.system(f'start "excel.exe" "{filepath_a}"')
+    os.system(f'start "excel.exe" "{filepath_b}"')
     success("Launching Excel...")
 
     # D3: Avoid exiting the console while launching Excel
@@ -92,9 +92,9 @@ def main(df, info, noninfo, folder, name):
 
 # ---------------------------------------- Excel Writer ---------------------------------------- #
 def to_excel(df, sheet_name: str, excel_writer, start_row=1, start_col=0, info=None, title=None,
-             title_size=62, groups=None, image=None):
+             title_size=62, groups=None, image=None, has_logo=False):
     if groups is None:
-        groups = list()
+        groups = []
 
     df.drop("index", axis=1, errors="ignore", inplace=True)
     if title is None:
@@ -263,9 +263,9 @@ def categorical_stats(df, series, group_by="Tất cả"):
 
 def numerical_stats(df, series, group_by="Tất cả", old_data=None):
     if old_data is None:
-        old_data = list()
+        old_data = []
     data = pd.DataFrame(old_data)
-    data.loc[:, group_by] = df[series].agg(["sum", "count", "mean", "median", "min", "max", "std"])
+    data.loc[:, group_by] = df[series].agg(["sum", "count", "mean", "std", "median", "min", "max"])
     return data
 
 
@@ -308,4 +308,4 @@ def summary_statistics(df, writer_engine, noninfo, groups):
                     data.drop("index", axis=1, inplace=True)
 
                     to_excel(data, series, writer_engine, title=series, title_size=30, image=[i for i in [
-                        visualization.kde(df, series), visualization.kde(df, series, groups)] if i is not None])
+                        visualization.hist(df, series, groups), visualization.box(df, series, groups)] if i is not None])

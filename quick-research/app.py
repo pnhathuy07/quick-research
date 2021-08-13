@@ -1,5 +1,5 @@
 import functions
-from functions import err, success
+from functions import err, success, text
 import cleaning
 import visualization
 import analysis
@@ -23,6 +23,7 @@ def main():
     functions.credit()
 
     # -------------------------------- PART B: Importing Data -------------------------------- #
+    # B1: Importing
     file = functions.drag_drop()
     name = file.stem
     folder = str(file.parent).replace("/", "\\") + "\\" + name
@@ -32,14 +33,22 @@ def main():
         err("Imported data must be a CSV file.")
         functions.quit_app()
 
-    df = pd.read_csv(file, usecols=(lambda x: x not in ["Timestamp", "index"]))
+    df = pd.read_csv(file, usecols=(lambda x: x not in ["Timestamp", "Dấu thời gian", "index"]))
 
-    if len(df.index) < 3:
-        err("Your data must have at least 3 records.")
+    if len(df.columns) < 3:
+        err("Your data must have at least 3 columns.")
         functions.quit_app()
 
-    success("Data has been successfully imported into this DataFrame.")
-    print(df, df.info(), sep="\n\n")
+    if len(df.index) < 6:
+        err("Your data must have at least 6 records.")
+        functions.quit_app()
+
+    # B2: Cleaning column names
+    df = cleaning.column_name_cleaning(df)
+
+    # B3: Data summary
+    success("Here is a summary of the columns in your data.")
+    df.info(memory_usage='deep')
 
     # -------------------------------- PART C: Survey Analysis -------------------------------- #
     # C1: Extract personal information

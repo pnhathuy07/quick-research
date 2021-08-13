@@ -1,7 +1,8 @@
 import os
 
 directory = os.path.dirname(__file__)
-logo_directory = directory + "/source/images/transparent/colorful/black_text/logo_horizontal.png"
+logo_directory = [directory + "/source/images/transparent/colorful/black_text/logo_horizontal.png",
+                  directory + "/source/images/transparent/colorful/logo.png"]
 
 
 def page(excel_writer):
@@ -24,7 +25,7 @@ def page(excel_writer):
     worksheet.set_column(0, 0, 137)
 
     # Logo
-    worksheet.insert_image(0, 0, logo_directory, dict(x_offset=0, y_offset=0, x_scale=.5, y_scale=.5))
+    worksheet.insert_image(0, 0, logo_directory[0], dict(x_offset=0, y_offset=0, x_scale=.5, y_scale=.5))
 
     # Move selection out of sight
     selection_a, selection_b = 270206, 11187
