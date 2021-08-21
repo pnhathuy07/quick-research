@@ -1,4 +1,12 @@
 import os
+import configurations
+
+
+def credit():
+    """Print the credit line (i.e. name, version, creator)"""
+    print(configurations.creditLine)
+    print(configurations.separator_string)
+
 
 directory = os.path.dirname(__file__)
 logo_directory = [directory + "/source/images/transparent/colorful/black_text/logo_horizontal.png",

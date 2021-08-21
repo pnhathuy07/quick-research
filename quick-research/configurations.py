@@ -14,7 +14,7 @@ separator_string = f"{ConsoleColors.bold}---------------------------------------
                    f"--------------------------------------------{ConsoleColors.end}"
 
 version = "3.0"
-product_name = f"\n{ConsoleColors.bold}Quick Research (Version {version})" \
+product_name = f"\n{ConsoleColors.bold}Quick Research {ConsoleColors.blue}(Version {version})" \
                f"{ConsoleColors.end}"
 creditLine = f"{product_name}\nPhan Nhat Huy"
 

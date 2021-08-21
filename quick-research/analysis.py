@@ -3,7 +3,7 @@ import numpy as np
 from pandas.api.types import is_string_dtype as is_categorical, is_numeric_dtype as is_numerical
 import xlsxwriter
 from xlsxwriter.utility import xl_range
-from functions import err, inp_select, success, to_front, max_len, validate
+from functions import err, inp_select, success, text, to_front, max_len, validate
 import visualization
 import branding
 
@@ -45,9 +45,9 @@ def main(df, info, noninfo, folder, name):
     df_all = calculate_frequency(df_all, noninfo)
 
     # B2: Write analysis worksheets
-    to_excel(df_all, "Tất cả", writer_a, info=info, has_logo=True)
-    to_excel(df_all[df_all["__Class"].isin(["A", "B", "C"])], "Số đông", writer_a, info=info, has_logo=True)
-    to_excel(df_all[df_all["__Class"].isin(["D", "E", "F"])], "Số ít", writer_a, info=info, has_logo=True)
+    to_excel(df_all, "Tất cả", writer_a, info=info)
+    to_excel(df_all[df_all["__Class"].isin(["A", "B", "C"])], "Số đông", writer_a, info=info)
+    to_excel(df_all[df_all["__Class"].isin(["D", "E", "F"])], "Số ít", writer_a, info=info)
 
     # B3: Write grouped analysis worksheets
     groups = inp_select("Which column specifies the groups of the subjects?", df.columns.tolist(), n_max=1)
@@ -68,18 +68,17 @@ def main(df, info, noninfo, folder, name):
     # D1: Save writers
     success("Saving files...")
 
-    has_error = True
-    while has_error:
+    while True:
         try:
             writer_a.save()
             writer_b.save()
-            has_error = False
+            break
         except xlsxwriter.exceptions.FileCreateError:
             err("Please save your work and close Excel before new files can be saved.")
             input("Press Enter to Continue.\n")
 
     success("Successfully saved to this folder.")
-    print(folder)
+    text(folder)
 
     # D2: Launch Excel
     os.system(f'start "excel.exe" "{filepath_b}"')
@@ -92,7 +91,7 @@ def main(df, info, noninfo, folder, name):
 
 # ---------------------------------------- Excel Writer ---------------------------------------- #
 def to_excel(df, sheet_name: str, excel_writer, start_row=1, start_col=0, info=None, title=None,
-             title_size=62, groups=None, image=None, has_logo=False):
+             title_size=62, groups=None, image=None):
     if groups is None:
         groups = []
 
@@ -272,7 +271,7 @@ def numerical_stats(df, series, group_by="Tất cả", old_data=None):
 def summary_statistics(df, writer_engine, noninfo, groups):
     for series in df.columns:
         if series not in ["index", "__Freq", "__Class", "__Cluster"]:
-            if is_categorical(df[series]):
+            if is_categorical(df[series]) and df[series].nunique(dropna=True) <= 8:
                 if (series in noninfo) or (series == groups):
                     data = categorical_stats(df, series)
 

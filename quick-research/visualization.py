@@ -42,6 +42,7 @@ def hist(df, x, groups=None):
     plt.title(x, fontdict={"fontsize": title_size})
 
     plt.xlabel(None)
+    plt.grid(False, which='major', axis="x")
 
     return save_figure("HST", x)
 
@@ -68,6 +69,9 @@ def bar(df, name):
         plt.legend(edgecolor="#000000", fancybox=False)
     else:
         df.plot(kind="barh", legend=None)
+
+    plt.grid(True, which='major', axis="x", color='grey', alpha=.25)
+    plt.grid(False, which='major', axis="y")
 
     plt.title(name, fontdict={"fontsize": title_size})
 

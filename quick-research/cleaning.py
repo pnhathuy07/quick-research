@@ -1,51 +1,39 @@
-from functions import remove_spaces, success, inp, inp_select
+from functions import success, inp, inp_select, remove_spaces
 import re
 import pandas as pd
 import numpy as np
 from scipy import stats
 
-keywords = ("name", "họ và tên", "tên", "full name", "first name", "last name", "surname", "tuổi", "age", "how old",
-            "phone", "số điện thoại", "sđt", "sdt", "dt", "đt", "mobile", "di động", "mail", "email", "gmail",
-            "địa chỉ", "địa chỉ nhà", "address", "thành phố", "quận", "huyện", "phường", "tỉnh", "thành", "city",
-            "province", "district", "lớp", "khối", "class", "grade", "trường", "school", "là gì", "giới tính", "gender",
-            "sex", "nghề", "job", "career", "trình độ học vấn", "education", "học vấn")
+keywords = ("họ và tên", "tên", "tuổi", "số điện thoại", "sđt", "sdt", "dt", "đt", "di động", "mail", "email", "gmail",
+            "địa chỉ", "địa chỉ nhà", "thành phố", "quận", "huyện", "phường", "tỉnh", "thành", "lớp", "khối", "trường",
+            "là gì", "giới tính", "nghề", "trình độ học vấn", "học vấn")
 
-blacklisted_words = ("nếu", "sẽ", "làm", "thế nào", "if", "how would", "how do", "think", "nghĩ", "về việc", "muốn",
-                     "want", "thích", "interested", "like", "prefer", "would you", "rather", "chọn", "choose", "pick",
-                     "nào", "option", "following", "có", "không", "có", "không", "theo", "theo bạn", "theo em",
-                     "theo anh", "theo chị", "theo anh/chị", "theo anh chị", "opinion", "best", "nhất", "sau đây",
-                     "sau")
-
-
-def to_score(word):
-    """Artificial learning model."""
-    word = remove_spaces(word.lower())
-
-    return (
-               (
-                       len(word)
-                       - sum(len(k) for k in keywords if remove_spaces(k) in word)
-                       + sum(remove_spaces(b) in word for b in blacklisted_words) * 8
-               )
-           ) / (0.2 + sum(remove_spaces(k) in word for k in keywords))
+blacklisted = ("nếu", "sẽ", "làm", "thế nào", "nghĩ", "về việc", "muốn", "thích", "chọn", "chọn một", "nào", "option",
+               "có", "không", "có", "không", "theo", "theo bạn", "theo em", "theo anh", "theo chị", "theo anh/chị",
+               "theo anh chị", "theo quý", "nhất", "sau đây", "sau", "thấy", "môi trường", "môi")
 
 
 def column_name_cleaning(df):
     cols = []
-    parenthesis = r"[(\[].*?[)\]]"
     for i in df.columns:
         match = re.findall(r"(?<=\[).+?(?=])", i)
         text = match[-1] if len(match) > 0 else i
-        cols.append(" ".join(re.sub(parenthesis, "", text).strip().split()))
+        cols.append(" ".join(re.sub(r"[(\[].*?[)\]]", "", text).strip().split()))
     df.columns = cols
     return df
 
 
-def info_extract(df):
-    ls = np.array(df.columns)
-    ls_mp = np.array(list(map(lambda x: to_score(x), ls)))
+def info_columns(df):
+    score = []
+    for i, col_name in enumerate(df.columns):
+        col_name = remove_spaces(col_name)
 
-    ls = list(ls[ls_mp < 16])
+        kw_score = sum(remove_spaces(k) in col_name for k in keywords) + 2
+        bl_score = sum(remove_spaces(b) in col_name for b in blacklisted) * 10
+
+        score.append((len(col_name) - kw_score * 2 + bl_score) / kw_score + i * 2)
+
+    ls = list(np.array(df.columns)[np.array(score) < 15])
     success(f"We have recognized that the following columns contain personal information of the subjects\n{ls}")
 
     confirm = inp("Is this recognition correct?", "Yes", "No", default="A")

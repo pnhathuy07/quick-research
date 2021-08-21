@@ -1,29 +1,17 @@
 import functions
-from functions import err, success, text
+from functions import err, success, text, mkdir
+import branding
 import cleaning
 import visualization
 import analysis
 import pandas as pd
-import os
-
-
-def makedir(folder_name: str, open_folder: bool = False):
-    """Create new folders."""
-    try:
-        os.mkdir(folder_name, 0o755)
-    except OSError:
-        pass
-
-    if open_folder:
-        os.startfile("\"{}\"".format(folder_name))
 
 
 def main():
     # -------------------------------- PART A: Credit Line -------------------------------- #
-    functions.credit()
+    branding.credit()
 
     # -------------------------------- PART B: Importing Data -------------------------------- #
-    # B1: Importing
     file = functions.drag_drop()
     name = file.stem
     folder = str(file.parent).replace("/", "\\") + "\\" + name
@@ -39,37 +27,40 @@ def main():
         err("Your data must have at least 3 columns.")
         functions.quit_app()
 
-    if len(df.index) < 6:
-        err("Your data must have at least 6 records.")
+    if len(df.index) < 10:
+        err("Your data must have at least 10 records.")
         functions.quit_app()
 
-    # B2: Cleaning column names
+    # -------------------------------- PART C: Data Cleaning -------------------------------- #
+    # C1: Cleaning column names
     df = cleaning.column_name_cleaning(df)
 
-    # B3: Data summary
+    # C2: Data summary
     success("Here is a summary of the columns in your data.")
     df.info(memory_usage='deep')
 
-    # -------------------------------- PART C: Survey Analysis -------------------------------- #
-    # C1: Extract personal information
-    info = cleaning.info_extract(df)
+    # C3: Detecting columns with personal information
+    info = cleaning.info_columns(df)
     noninfo = [i for i in df.columns if i not in info]
 
-    # C2: Clean data
+    # C4: Data Cleaning
     df = cleaning.clean_na(df, noninfo)
     df.reset_index(drop=True, inplace=True)
 
-    success("Data cleaning completed. Here is the final DataFrame.")
-    print(df, df.info(), sep="\n\n")
+    success("Data cleaning completed. Processed data will be saved.")
 
-    # C3: Create directories
-    makedir(folder, True)
+    # -------------------------------- PART D: Survey Analysis -------------------------------- #
+    # D1: Create directories
+    mkdir(folder, True)
+
     df.to_csv(folder + "\\" + name + extension, index=False)
+    success("Data successfully saved to this folder.")
+    text(folder)
 
-    makedir(folder + "\\plots")
-    visualization.main(folder)
+    mkdir(folder + "\\plots")
+    visualization.main(folder)  # Setting up visual engine
 
-    # C4: Survey Analysis
+    # D2: Survey Analysis
     analysis.main(df, info, noninfo, folder, name)
 
 

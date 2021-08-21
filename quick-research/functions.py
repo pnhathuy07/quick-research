@@ -1,24 +1,12 @@
 import re
 import sys
+import os
 from pathlib import Path
-import configurations as config
-from configurations import separator_string, skip_string, ConsoleColors
-
-
-# ---------------------------------------- Credits ---------------------------------------- #
-def separator():
-    """Print separator"""
-    print(separator_string)
-
-
-def credit():
-    """Print the credit line (i.e. name, version, creator)"""
-    print(config.creditLine)
-    separator()
+from configurations import skip_string, ConsoleColors
 
 
 # ---------------------------------------- User Interface ---------------------------------------- #
-def inp(message, *options, assign="", default="", desc=""):
+def inp(message, *options, assign="", default=""):
     __ass = ""
     __def = ""
     __opt = ""
@@ -27,7 +15,7 @@ def inp(message, *options, assign="", default="", desc=""):
     if not assign == "":
         __ass = f"{assign} = "
     if not default == "":
-        __def = f"{ConsoleColors.cyan}[Default: {default}] {ConsoleColors.end}\n"
+        __def = f"{ConsoleColors.blue}[Default: {default}] {ConsoleColors.end}\n"
     if not options == ():
         __opt = f"{ConsoleColors.bold}(Type {', '.join([' for '.join(map(str, i)) for i in zip(letters, options)])})" \
                 f"{ConsoleColors.end} "
@@ -148,6 +136,17 @@ def max_len(input_string: str, n_len=31) -> str:
 
 
 # ---------------------------------------- System Controls ---------------------------------------- #
+def mkdir(folder_name: str, open_folder: bool = False):
+    """Create new folders."""
+    try:
+        os.mkdir(folder_name, 0o755)
+    except OSError:
+        pass
+
+    if open_folder:
+        os.startfile("\"{}\"".format(folder_name))
+
+
 def quit_app():
     sys.exit(0)
 
