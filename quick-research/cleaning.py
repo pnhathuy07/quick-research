@@ -75,7 +75,7 @@ def clean_na(df: any, noninfo: list):
             # Mode imputation
             for col in null_columns:
                 df.loc[:, col] = df[col].fillna(
-                    stats.mode([i for i in df[col] if not str(i) == "nan"], axis=None)[0][0])
+                    stats.mode([i for i in df[col] if str(i) != "nan"], axis=None)[0][0])
 
         # Print rows with missing values (after treatment)
         print(df[null_rows])
