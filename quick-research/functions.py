@@ -16,7 +16,7 @@ def inp(message, *options, assign="", default=""):
         __ass = f"{assign} = "
     if default != "":
         __def = f"{ConsoleColors.blue}[Default: {default}] {ConsoleColors.end}\n"
-    if "options != ():
+    if options != ():
         __opt = f"{ConsoleColors.bold}(Type {', '.join([' for '.join(map(str, i)) for i in zip(letters, options)])})" \
                 f"{ConsoleColors.end} "
 
