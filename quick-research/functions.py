@@ -12,11 +12,11 @@ def inp(message, *options, assign="", default=""):
     __opt = ""
     letters = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-    if not assign == "":
+    if assign != "":
         __ass = f"{assign} = "
-    if not default == "":
+    if default != "":
         __def = f"{ConsoleColors.blue}[Default: {default}] {ConsoleColors.end}\n"
-    if not options == ():
+    if "options != ():
         __opt = f"{ConsoleColors.bold}(Type {', '.join([' for '.join(map(str, i)) for i in zip(letters, options)])})" \
                 f"{ConsoleColors.end} "
 
@@ -25,7 +25,7 @@ def inp(message, *options, assign="", default=""):
     failed_attempt = 0
     max_failed_attempt = 5
 
-    while result == "" or (__opt != "" and not result.upper() in letters[:len(options)]):
+    while result == "" or (__opt != "" and result.upper() not in letters[:len(options)]):
         result = input(f"\n{ConsoleColors.bold}{message}{ConsoleColors.end}\n{__opt}{__def}>>> {__ass}").strip()
 
         if result == "":
@@ -35,7 +35,7 @@ def inp(message, *options, assign="", default=""):
                 failed_attempt += 1
                 print(
                     f"{ConsoleColors.red}You cannot leave this field blank.{ConsoleColors.end}")
-        if __opt != "" and not result.upper() in letters[:len(options)]:
+        if __opt != "" and result.upper() not in letters[:len(options)]:
             failed_attempt += 1
             print(
                 f"{ConsoleColors.red}Invalid input. You must select one from the options above.{ConsoleColors.end}")
