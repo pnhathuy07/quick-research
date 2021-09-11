@@ -83,6 +83,11 @@ def main(df, info, noninfo, folder, name):
     # D2: Launch Excel
     os.system(f'start "excel.exe" "{filepath_b}"')
     success("Launching Excel...")
+    
+    # D3: Avoid exiting the console while launching Excel
+    while True:
+        if input() != "":
+            break
 
 
 # ---------------------------------------- Excel Writer ---------------------------------------- #
