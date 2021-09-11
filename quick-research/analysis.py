@@ -85,8 +85,9 @@ def main(df, info, noninfo, folder, name):
     success("Launching Excel...")
 
     # D3: Avoid exiting the console while launching Excel
-    while input() == "":
-        pass
+    while True:
+        if input() != "":
+            break
 
 
 # ---------------------------------------- Excel Writer ---------------------------------------- #
