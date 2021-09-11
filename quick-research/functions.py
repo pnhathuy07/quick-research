@@ -109,7 +109,7 @@ def success(message):
 
 def drag_drop():
     file_list = re.findall(r"[a-zA-Z]:/[^\\:*?\"><|]*?\.[\w:]+(?!.*[\w.])",
-                           inp(f"Drag and drop your file here").replace("\\", "/").replace("//", "/"))
+                           inp("Drag and drop your file here").replace("\\", "/").replace("//", "/"))
 
     if len(file_list) == 0:
         err("No valid filepath found.")
